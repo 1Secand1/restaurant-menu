@@ -17,15 +17,17 @@ productListHandler.setHTMLTemplate("li", "order-list__item", "", (data) => {
     <div class="order-list__quantity-of-product">
       <div class="order-list__item-quantity-control">
 
-        <button class="order-list__item-quantity-control-button 
-        order-list__item-quantity-control-button--decrease" type="button">-
-        </button>
+        <button class="
+          order-list__item-quantity-control-button 
+          order-list__item-quantity-control-button--decrease" 
+        type="button"> - </button>
 
         <p class="order-list__item-product-quantity">${data.count}</p>
 
-        <button class="order-list__item-quantity-control-button 
-        order-list__item-quantity-control-button--increase" type="button">+
-        </button>
+        <button class="
+          order-list__item-quantity-control-button 
+          order-list__item-quantity-control-button--increase" 
+        type="button"> + </button>
 
       </div>
 
@@ -34,7 +36,11 @@ productListHandler.setHTMLTemplate("li", "order-list__item", "", (data) => {
   </article>
   `;
 });
-productListHandler.assignButtonsToСontrol("a", "a", "a");
+productListHandler.assignButtonsToСontrol(
+  "order-list__item-quantity-control-button--decrease",
+  "order-list__item-quantity-control-button--increase",
+  "-"
+);
 
 menuHandler.exportItem((exportableItem) =>
   productListHandler.importAndAdd(exportableItem)
@@ -255,19 +261,11 @@ function createProductListHandler(containerId) {
 
     mapSelectedProducts.set(key, existingProduct);
   }
-  function addQuantityChanges(containerId, key, event) {
-    const buttons = containerId.querySelectorAll("button");
+  function addQuantityChanges(containerId, key, сlassName, event) {
+    const buttons = containerId.querySelector("." + сlassName);
 
-    buttons.forEach((button, id) => {
-      button.addEventListener("click", () => {
-        if (id == 0) {
-          increaseProductCount(key, "-");
-        }
-        if (id == 1) {
-          increaseProductCount(key, "+");
-        }
-      });
-      
+    buttons.addEventListener("click", () => {
+      console.log("Ляботай пазязя");
     });
   }
   function HTMLtemplateGenerator(item) {
@@ -288,14 +286,15 @@ function createProductListHandler(containerId) {
 
     container.appendChild(listItem);
 
-    addQuantityChanges(listItem, item.key);
+    addQuantityChanges(listItem, item.key, dataTemplate.buttonIncrease);
+    addQuantityChanges(listItem, item.key, dataTemplate.buttonReduce);
   }
   function updateTemplate(key, item) {
     const content = template.content;
     const element = container.querySelector(`[data-id="${key}"]`);
     element.innerHTML = content(item);
 
-    addQuantityChanges(element, key);
+    // addQuantityChanges(element, key);
   }
   return {
     importAndAdd(element) {
@@ -393,3 +392,18 @@ function firstSimonToLocaleUpperCase(string) {
     })
     .join("");
 }
+
+// if (event == "buttonIncrease") {
+//   if (id != 1) return;
+//   increaseProductCount(key, "+");
+// }
+
+// if (event == "buttonReduce") {
+//   if (id != 0) return;
+//   increaseProductCount(key, "-");
+// }
+
+// if (event == "buttonReduce") {
+//   if (id != 0) return;
+//   increaseProductCount(key, "-");
+// }
