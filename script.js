@@ -11,6 +11,7 @@ productListHandler.setHTMLTemplate("li", "order-list__item", "", (data) => {
     data.name
   }">
 
+
   <article class="order-list__item-content">
     <h3 class="order-list__item-title">${data.name}</h3>
 
@@ -32,6 +33,8 @@ productListHandler.setHTMLTemplate("li", "order-list__item", "", (data) => {
       </div>
 
       <p> ${data.price * data.count} </p>
+      <button class="order-list__item-quantity-control-button--delete">✕</button>
+
     </div>
   </article>
   `;
@@ -39,7 +42,7 @@ productListHandler.setHTMLTemplate("li", "order-list__item", "", (data) => {
 productListHandler.assignButtonsToСontrol(
   "order-list__item-quantity-control-button--decrease",
   "order-list__item-quantity-control-button--increase",
-  "-"
+  "order-list__item-quantity-control-button--delete"
 );
 
 menuHandler.exportItem((exportableItem) =>
@@ -220,7 +223,6 @@ function createProductListHandler(containerId) {
         if (!changeableElement) {
           HTMLtemplateGenerator(value);
         }
-
         return nameMap.set(kay, value);
       },
       get(kay) {
@@ -231,6 +233,9 @@ function createProductListHandler(containerId) {
       },
       has(kay) {
         return nameMap.has(kay);
+      },
+      delete(kay) {
+        return nameMap.delete(kay);
       },
     };
   }
@@ -261,14 +266,43 @@ function createProductListHandler(containerId) {
 
     mapSelectedProducts.set(key, existingProduct);
   }
-  function addQuantityChanges(containerId, key, сlassName, event) {
-    const buttons = containerId.querySelector("." + сlassName);
+  function addSettingEquivalents(container, key) {
+    const classNameButtons = [
+      dataTemplate.buttonIncrease,
+      dataTemplate.buttonReduce,
+      dataTemplate.buttonRemove,
+    ];
 
-    buttons.addEventListener("click", () => {
-      console.log("Ляботай пазязя");
+    classNameButtons.forEach((element, id) => {
+      if (!element) return;
+
+      const button = container.querySelector("." + element);
+
+      switch (id) {
+        case 0:
+          button.addEventListener("click", () => {
+            increaseProductCount(key, "-");
+          });
+          break;
+        case 1:
+          button.addEventListener("click", () => {
+            increaseProductCount(key, "+");
+          });
+          break;
+        case 2:
+          button.addEventListener("click", () => {
+            container.remove();
+            mapSelectedProducts.delete(key);
+          });
+          break;
+        default:
+          break;
+      }
     });
   }
   function HTMLtemplateGenerator(item) {
+    console.log(1);
+
     const listItem = document.createElement(template.tagWrap);
 
     listItem.dataset.id = item.key;
@@ -286,15 +320,14 @@ function createProductListHandler(containerId) {
 
     container.appendChild(listItem);
 
-    addQuantityChanges(listItem, item.key, dataTemplate.buttonIncrease);
-    addQuantityChanges(listItem, item.key, dataTemplate.buttonReduce);
+    addSettingEquivalents(listItem, item.key);
   }
   function updateTemplate(key, item) {
     const content = template.content;
     const element = container.querySelector(`[data-id="${key}"]`);
     element.innerHTML = content(item);
 
-    // addQuantityChanges(element, key);
+    addSettingEquivalents(element, key);
   }
   return {
     importAndAdd(element) {
@@ -327,7 +360,6 @@ function createProductListHandler(containerId) {
         mapSelectedProducts.set(key, newItemParameters);
         console.log(newItemParameters);
       }
-      console.log("VZZZ", template);
     },
     getSelectedProducts() {
       return mapSelectedProducts.get();
