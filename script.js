@@ -4,50 +4,56 @@ const menuHandler = createMenuHandler();
 menuHandler.categoryGeneration("categoriesList");
 menuHandler.contentGeneration("menu");
 
+menuHandler.exportItem((exportableItem) =>
+  productListHandler.importAndAdd(exportableItem)
+);
+
 const productListHandler = createProductListHandler("orderList");
-productListHandler.setHTMLTemplate("li", "order-list__item", "", (data) => {
-  return ` 
-  <img class="order-list__item-image" src="${data.previewPictureUrl}" alt="${
-    data.name
-  }">
+productListHandler.setHTMLTemplateListItems(
+  "li",
+  "order-list__item",
+  "",
+  productListHandler.setHTML((data) => {
+    return `
+<img class="order-list__item-image" 
+     src="${data.previewPictureUrl}" 
+     alt="${data.name}">
 
+<article class="order-list__item-content">
+  <h3 class="order-list__item-title">${data.name}</h3>
 
-  <article class="order-list__item-content">
-    <h3 class="order-list__item-title">${data.name}</h3>
+  <div class="order-list__quantity-of-product">
+    <div class="order-list__item-quantity-control">
 
-    <div class="order-list__quantity-of-product">
-      <div class="order-list__item-quantity-control">
+      <button class="
+        order-list__item-quantity-control-button
+        order-list__item-quantity-control-button--decrease"
+      type="button"> - </button>
 
-        <button class="
-          order-list__item-quantity-control-button 
-          order-list__item-quantity-control-button--decrease" 
-        type="button"> - </button>
+      <p class="order-list__item-product-quantity">${data.count}</p>
 
-        <p class="order-list__item-product-quantity">${data.count}</p>
-
-        <button class="
-          order-list__item-quantity-control-button 
-          order-list__item-quantity-control-button--increase" 
-        type="button"> + </button>
-
-      </div>
-
-      <p> ${data.price * data.count} </p>
-      <button class="order-list__item-quantity-control-button--delete">✕</button>
+      <button class="
+        order-list__item-quantity-control-button
+        order-list__item-quantity-control-button--increase"
+      type="button"> + </button>
 
     </div>
-  </article>
-  `;
-});
+
+    <p> ${data.price * data.count} </p>
+    <button class="order-list__item-quantity-control-button--delete">✕</button>
+
+  </div>
+</article>
+`;
+  })
+);
 productListHandler.assignButtonsToСontrol(
   "order-list__item-quantity-control-button--decrease",
   "order-list__item-quantity-control-button--increase",
   "order-list__item-quantity-control-button--delete"
 );
 
-menuHandler.exportItem((exportableItem) =>
-  productListHandler.importAndAdd(exportableItem)
-);
+// ---------------------------------------------------
 
 function createMenuHandler() {
   const menu = document.getElementById("#menu");
@@ -135,8 +141,8 @@ function createMenuHandler() {
         .map(
           (category) => `
           <li>
-            <button 
-              class="categories__item" 
+            <button
+              class="categories__item"
               id="${category.id}"
               onclick="activateTabs('${category.categoryName}', 'menu__list')">
 
@@ -208,8 +214,8 @@ function createMenuHandler() {
 
 function createProductListHandler(containerId) {
   const container = document.getElementById(containerId);
-  const mapSelectedProducts = proxyMap();
 
+  const mapSelectedProducts = proxyMap();
   function proxyMap() {
     const nameMap = new Map();
 
@@ -223,6 +229,7 @@ function createProductListHandler(containerId) {
         if (!changeableElement) {
           HTMLtemplateGenerator(value);
         }
+
         return nameMap.set(kay, value);
       },
       get(kay) {
@@ -239,17 +246,8 @@ function createProductListHandler(containerId) {
       },
     };
   }
-
-  let dataTemplate = {
-    tagWrap: Number,
-    id: Number,
-    className: String,
-    content: Function(),
-
-    buttonIncrease: String,
-    buttonReduce: String,
-    buttonRemove: String,
-  };
+  const templates = new Map();
+  templates.set("templateListItems");
 
   function increaseProductCount(key, value) {
     const existingProduct = mapSelectedProducts.get(key);
@@ -266,12 +264,18 @@ function createProductListHandler(containerId) {
 
     mapSelectedProducts.set(key, existingProduct);
   }
+  function updateTemplate(key, item) {
+    const { content } = templates.get("templateListItems");
+    const element = container.querySelector(`[data-id="${key}"]`);
+
+    element.innerHTML = content(item);
+    addSettingEquivalents(element, key);
+  }
   function addSettingEquivalents(container, key) {
-    const classNameButtons = [
-      dataTemplate.buttonIncrease,
-      dataTemplate.buttonReduce,
-      dataTemplate.buttonRemove,
-    ];
+    let { buttonIncrease, buttonReduce, buttonRemove } =
+      templates.get("templateListItems");
+
+    let classNameButtons = [buttonIncrease, buttonReduce, buttonRemove];
 
     classNameButtons.forEach((element, id) => {
       if (!element) return;
@@ -301,33 +305,26 @@ function createProductListHandler(containerId) {
     });
   }
   function HTMLtemplateGenerator(item) {
-    console.log(1);
+    let { tagWrap, id, className, content } =
+    templates.get("templateListItems");
 
-    const listItem = document.createElement(template.tagWrap);
+    const listItem = document.createElement(tagWrap);
 
     listItem.dataset.id = item.key;
 
-    if (template.className) {
-      listItem.classList.add(template.className);
+    if (className) {
+      listItem.classList.add(className);
     }
 
-    if (template.id) {
-      listItem.id = template.id;
+    if (id) {
+      listItem.id = id;
     }
 
-    const content = template.content;
     listItem.innerHTML = content(item);
 
     container.appendChild(listItem);
 
     addSettingEquivalents(listItem, item.key);
-  }
-  function updateTemplate(key, item) {
-    const content = template.content;
-    const element = container.querySelector(`[data-id="${key}"]`);
-    element.innerHTML = content(item);
-
-    addSettingEquivalents(element, key);
   }
   return {
     importAndAdd(element) {
@@ -364,34 +361,38 @@ function createProductListHandler(containerId) {
     getSelectedProducts() {
       return mapSelectedProducts.get();
     },
-    setHTMLTemplate(tagWrap, className, id, content) {
-      if (!tagWrap) {
-        throw new Error("TagWrapp name is not defined");
-      }
-      if (tagWrap) {
-        dataTemplate.tagWrap = tagWrap;
-      }
-      if (className) {
-        dataTemplate.className = className;
-      }
-      if (id) {
-        dataTemplate.id = id;
-      }
+    orderPriceDisplay() {},
 
-      if (content) {
-        dataTemplate.content = content;
-      }
-
-      template = dataTemplate;
-    },
     assignButtonsToСontrol(increaseProductCount, reduceProductCount, remove) {
-      template.buttonIncrease = increaseProductCount;
-      template.buttonReduce = reduceProductCount;
-      template.buttonRemove = remove;
+      const template = templates.get("templateListItems");
+      const templateExtension = {
+        ...template,
+        buttonIncrease: increaseProductCount,
+        buttonReduce: reduceProductCount,
+        buttonRemove: remove,
+      };
+      templates.set("templateListItems", templateExtension);
+    },
+
+    setHTML(Function) {
+      return Function;
+    },
+
+    setHTMLTemplateListItems(tagWrap, className, id, content) {
+      templates.set(
+        "templateListItems",
+        setTemplate(
+          ["tagWrap", "className", "id", "content"],
+          [tagWrap, className, id, content]
+        )
+      );
     },
   };
 }
 
+function summarizingTheOrder(containerId, idTotalPrice, idTotalNumber) {}
+
+// _____________________utilities__________________________
 /**
  * Show the tab content with the specified ID and hide all othertabs.
  * @param {string} tabId - The ID of the tab to activate.
@@ -414,8 +415,6 @@ function activateTabs(tabId, tabsWrapClass) {
     wrapper.style.display = isTargetTab ? "flex" : "none";
   });
 }
-
-// _____________________utilities__________________________
 function firstSimonToLocaleUpperCase(string) {
   return [...string]
     .map((element, id) => {
@@ -424,18 +423,18 @@ function firstSimonToLocaleUpperCase(string) {
     })
     .join("");
 }
+function setTemplate(dataNames, dataValue) {
+  if (!Array.isArray(dataNames) || !Array.isArray(dataValue)) {
+    throw new Error("Error: Both parameters must be arrays");
+  }
+  if (dataNames.length != dataValue.length) {
+    throw new Error("The number of names does not match the number of values");
+  }
+  const dataTemplate = new Object();
 
-// if (event == "buttonIncrease") {
-//   if (id != 1) return;
-//   increaseProductCount(key, "+");
-// }
+  for (let i = 0; i < dataNames.length; i++) {
+    dataTemplate[`${dataNames[i]}`] = dataValue[i];
+  }
 
-// if (event == "buttonReduce") {
-//   if (id != 0) return;
-//   increaseProductCount(key, "-");
-// }
-
-// if (event == "buttonReduce") {
-//   if (id != 0) return;
-//   increaseProductCount(key, "-");
-// }
+  return dataTemplate;
+}
