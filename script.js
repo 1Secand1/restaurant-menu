@@ -4,20 +4,21 @@ const menuHandler = createMenuHandler();
 menuHandler.categoryGeneration("categoriesList");
 menuHandler.contentGeneration("menu");
 
+const productListHandler = createProductListHandler("orderList");
 menuHandler.exportItem((exportableItem) =>
   productListHandler.importAndAdd(exportableItem)
 );
 
-const productListHandler = createProductListHandler("orderList");
 productListHandler.setHTMLTemplateListItems(
   "li",
   "order-list__item",
   "",
   productListHandler.setHTML((data) => {
     return `
-<img class="order-list__item-image" 
-     src="${data.previewPictureUrl}" 
-     alt="${data.name}">
+
+<img class="order-list__item-image" src="${data.previewPictureUrl}" alt="${
+      data.name
+    }">
 
 <article class="order-list__item-content">
   <h3 class="order-list__item-title">${data.name}</h3>
@@ -47,13 +48,15 @@ productListHandler.setHTMLTemplateListItems(
 `;
   })
 );
+productListHandler.totalOrderPriceHandler(
+  "numberOfProducts",
+  "totalPriceProducts"
+);
 productListHandler.assignButtonsToСontrol(
   "order-list__item-quantity-control-button--decrease",
   "order-list__item-quantity-control-button--increase",
   "order-list__item-quantity-control-button--delete"
 );
-
-// ---------------------------------------------------
 
 function createMenuHandler() {
   const menu = document.getElementById("#menu");
@@ -70,28 +73,28 @@ function createMenuHandler() {
           previewPictureUrl:
             "https://s3.amazonaws.com/static.cosplay.com/avatars/66438/SvcYxXO.jpg",
           name: "Эспрессо",
-          price: 231,
+          price: 56,
         },
         {
           id: 1,
           previewPictureUrl:
             "https://s3.amazonaws.com/static.cosplay.com/avatars/66438/SvcYxXO.jpg",
           name: "Американо",
-          price: 160,
+          price: 120,
         },
         {
           id: 2,
           previewPictureUrl:
             "https://s3.amazonaws.com/static.cosplay.com/avatars/66438/SvcYxXO.jpg",
           name: "Латте",
-          price: 421,
+          price: 89,
         },
         {
           id: 3,
           previewPictureUrl:
             "https://s3.amazonaws.com/static.cosplay.com/avatars/66438/SvcYxXO.jpg",
           name: "Халвяное латте",
-          price: 637,
+          price: 130,
         },
       ],
     },
@@ -214,40 +217,104 @@ function createMenuHandler() {
 
 function createProductListHandler(containerId) {
   const container = document.getElementById(containerId);
+  const mapSelectedProducts = handler();
+  const listTotalOrderPrice = new Map();
 
-  const mapSelectedProducts = proxyMap();
-  function proxyMap() {
+  function handler() {
     const nameMap = new Map();
 
+    function updateTotalOrderPrice(kayValue, event) {
+      if (!kayValue) return;
+
+      const { idTotalNumber, idTotalPrice } = templates.get("totalOrderPrice");
+      const { key, price, count } = mapSelectedProducts.get(kayValue);
+
+      const totalNumber = document.getElementById(idTotalNumber);
+      const totalPrice = document.getElementById(idTotalPrice);
+
+      switch (event) {
+        case "+":
+          listTotalOrderPrice.set(key, price * count);
+          break;
+        case "-":
+          listTotalOrderPrice.delete(key);
+          break;
+        default:
+          break;
+      }
+
+      const totalOrderPrice = Array.from(listTotalOrderPrice.values()).reduce(
+        (acc, val) => acc + val,
+        0
+      );
+
+      totalNumber.value = listTotalOrderPrice.size;
+      totalPrice.value = totalOrderPrice;
+    }
+    function updateTemplate(key, item) {
+      const { content } = templates.get("templateListItems");
+      const element = container.querySelector(`[data-id="${key}"]`);
+
+      element.innerHTML = content(item);
+      addSettingEquivalents(element, key);
+    }
+    function HTMLtemplateGenerator(item) {
+      let { tagWrap, id, className, content } =
+        templates.get("templateListItems");
+
+      const listItem = document.createElement(tagWrap);
+
+      listItem.dataset.id = item.key;
+
+      if (className) {
+        listItem.classList.add(className);
+      }
+
+      if (id) {
+        listItem.id = id;
+      }
+
+      listItem.innerHTML = content(item);
+
+      container.appendChild(listItem);
+
+      addSettingEquivalents(listItem, item.key);
+    }
     return {
-      set(kay, value) {
-        const changeableElement = nameMap.has(kay);
-        if (changeableElement) {
-          updateTemplate(kay, value);
-        }
+      set(key, value) {
+        const changeableElement = nameMap.has(key);
+        nameMap.set(key, value);
 
         if (!changeableElement) {
           HTMLtemplateGenerator(value);
         }
 
-        return nameMap.set(kay, value);
+        if (changeableElement) {
+          updateTemplate(key, value);
+        }
+        updateTotalOrderPrice(key, "+");
+
+        return;
       },
-      get(kay) {
-        if (!kay) {
+      get(key) {
+        if (!key) {
           return nameMap;
         }
-        return nameMap.get(kay);
+        return nameMap.get(key);
       },
-      has(kay) {
-        return nameMap.has(kay);
+      has(key) {
+        return nameMap.has(key);
       },
-      delete(kay) {
-        return nameMap.delete(kay);
+      delete(key) {
+        updateTotalOrderPrice(key, "-");
+        nameMap.delete(key);
+      },
+      size() {
+        return nameMap.size;
       },
     };
   }
   const templates = new Map();
-  templates.set("templateListItems");
 
   function increaseProductCount(key, value) {
     const existingProduct = mapSelectedProducts.get(key);
@@ -263,13 +330,6 @@ function createProductListHandler(containerId) {
     }
 
     mapSelectedProducts.set(key, existingProduct);
-  }
-  function updateTemplate(key, item) {
-    const { content } = templates.get("templateListItems");
-    const element = container.querySelector(`[data-id="${key}"]`);
-
-    element.innerHTML = content(item);
-    addSettingEquivalents(element, key);
   }
   function addSettingEquivalents(container, key) {
     let { buttonIncrease, buttonReduce, buttonRemove } =
@@ -303,28 +363,6 @@ function createProductListHandler(containerId) {
           break;
       }
     });
-  }
-  function HTMLtemplateGenerator(item) {
-    let { tagWrap, id, className, content } =
-    templates.get("templateListItems");
-
-    const listItem = document.createElement(tagWrap);
-
-    listItem.dataset.id = item.key;
-
-    if (className) {
-      listItem.classList.add(className);
-    }
-
-    if (id) {
-      listItem.id = id;
-    }
-
-    listItem.innerHTML = content(item);
-
-    container.appendChild(listItem);
-
-    addSettingEquivalents(listItem, item.key);
   }
   return {
     importAndAdd(element) {
@@ -361,7 +399,18 @@ function createProductListHandler(containerId) {
     getSelectedProducts() {
       return mapSelectedProducts.get();
     },
-    orderPriceDisplay() {},
+    setHTML(Function) {
+      return Function;
+    },
+    setHTMLTemplateListItems(tagWrap, className, id, content) {
+      templates.set(
+        "templateListItems",
+        setTemplate(
+          ["tagWrap", "className", "id", "content"],
+          [tagWrap, className, id, content]
+        )
+      );
+    },
 
     assignButtonsToСontrol(increaseProductCount, reduceProductCount, remove) {
       const template = templates.get("templateListItems");
@@ -374,23 +423,17 @@ function createProductListHandler(containerId) {
       templates.set("templateListItems", templateExtension);
     },
 
-    setHTML(Function) {
-      return Function;
-    },
-
-    setHTMLTemplateListItems(tagWrap, className, id, content) {
+    totalOrderPriceHandler(idTotalNumber, idTotalPrice) {
       templates.set(
-        "templateListItems",
+        "totalOrderPrice",
         setTemplate(
-          ["tagWrap", "className", "id", "content"],
-          [tagWrap, className, id, content]
+          ["idTotalNumber", "idTotalPrice"],
+          [idTotalNumber, idTotalPrice]
         )
       );
     },
   };
 }
-
-function summarizingTheOrder(containerId, idTotalPrice, idTotalNumber) {}
 
 // _____________________utilities__________________________
 /**
