@@ -1,5 +1,5 @@
 "USE STRICT";
-
+//a,j,g
 const menuHandler = createMenuHandler();
 menuHandler.categoryGeneration("categoriesList");
 menuHandler.contentGeneration("menu");
@@ -16,35 +16,42 @@ productListHandler.setHTMLTemplateListItems(
   productListHandler.setHTML((data) => {
     return `
 
-<img class="order-list__item-image" src="${data.previewPictureUrl}" alt="${
-      data.name
-    }">
+  <img class="order-list__item-image" 
+  src="${data.previewPictureUrl}" alt="${data.name}">
 
-<article class="order-list__item-content">
+  <article class="order-list__item-content">
+
+  <div class="row">
   <h3 class="order-list__item-title">${data.name}</h3>
 
-  <div class="order-list__quantity-of-product">
-    <div class="order-list__item-quantity-control">
+  <button class="order-list__item-quantity-control-button--delete order-list__item-quantity-control-button ">✕</button>
+  </div>
+    <small class="order-list__item-name-cotigoria">${data.fromСotigoria}</small>
 
-      <button class="
-        order-list__item-quantity-control-button
-        order-list__item-quantity-control-button--decrease"
-      type="button"> - </button>
+    <div class="order-list__quantity-of-product">
+      <div class="order-list__item-quantity-control">
 
-      <p class="order-list__item-product-quantity">${data.count}</p>
+        <button class="
+          order-list__item-quantity-control-button
+          order-list__item-quantity-control-button--decrease"
+        type="button"> </button>
 
-      <button class="
-        order-list__item-quantity-control-button
-        order-list__item-quantity-control-button--increase"
-      type="button"> + </button>
+        <p class="order-list__item-product-quantity">${data.count}</p>
+
+        <button class="
+          order-list__item-quantity-control-button
+          order-list__item-quantity-control-button--increase"
+        type="button"> + </button>
+
+      </div>
+
+    <p class="order-list__item-product-price"> 
+      ${data.price * data.count} руб 
+    </p>
+  
 
     </div>
-
-    <p> ${data.price * data.count} </p>
-    <button class="order-list__item-quantity-control-button--delete">✕</button>
-
-  </div>
-</article>
+  </article>
 `;
   })
 );
@@ -65,34 +72,41 @@ function createMenuHandler() {
       id: 0,
       categoryName: "drinksMenu",
 
-      iconUrl: "/",
-      title: "напитки",
+      // iconUrl: "/img/Product-pictures/coffee/coffee-icon.svg",
+      title: "coffee",
       content: [
         {
           id: 0,
           previewPictureUrl:
-            "https://s3.amazonaws.com/static.cosplay.com/avatars/66438/SvcYxXO.jpg",
+            "./img/Product-pictures/coffee/contents/32a94c7f6e6174d4b890c4a20d097f26-216x188.jpeg",
           name: "Эспрессо",
           price: 56,
         },
         {
           id: 1,
           previewPictureUrl:
-            "https://s3.amazonaws.com/static.cosplay.com/avatars/66438/SvcYxXO.jpg",
+            "./img/Product-pictures/coffee/contents/461f9522a0aaf339f6acc33441278c62-216x188.jpeg",
           name: "Американо",
           price: 120,
         },
         {
           id: 2,
           previewPictureUrl:
-            "https://s3.amazonaws.com/static.cosplay.com/avatars/66438/SvcYxXO.jpg",
+            "./img/Product-pictures/coffee/contents/60f66e17d25713f45f48cdaf463872d9-216x188.jpeg",
           name: "Латте",
           price: 89,
         },
         {
           id: 3,
           previewPictureUrl:
-            "https://s3.amazonaws.com/static.cosplay.com/avatars/66438/SvcYxXO.jpg",
+            "./img/Product-pictures/coffee/contents/7d75817c08662e1ac94419579b263ff1-216x188.jpeg",
+          name: "Халвяное латте",
+          price: 130,
+        },
+        {
+          id: 4,
+          previewPictureUrl:
+            "./img/Product-pictures/coffee/contents/add29baa79c069eaccff3f07fbe7c940-216x188.jpeg",
           name: "Халвяное латте",
           price: 130,
         },
@@ -102,34 +116,77 @@ function createMenuHandler() {
       id: 1,
       categoryName: "pizzaMenu",
 
-      iconUrl: "/",
-      title: "пицца",
+      // iconUrl: "./img/Product-pictures/burger/hamburger-icon.svg",
+      title: "Burger",
       content: [
         {
           id: 0,
           previewPictureUrl:
-            "https://staticy.dominospizza.ru/api/medium/ProductOsg/Web/ПЕПЕ/NULL/NULL/RU",
+            "./img/Product-pictures/burger/contents/1921a91c5e696b490019b12718f10ee5-216x188.jpeg",
+
           name: "Пепперони",
           price: 499,
         },
         {
           id: 1,
           previewPictureUrl:
-            "https://staticy.dominospizza.ru/api/medium/ProductOsg/Web/4CHEESE/NULL/NULL/RU",
+            "./img/Product-pictures/burger/contents/51cb5adf1dd88c5f7be1e44113910609-216x188.jpeg",
           name: "Четыре сыра ",
           price: 699,
         },
         {
           id: 2,
           previewPictureUrl:
-            "https://staticy.dominospizza.ru/api/medium/ProductOsg/Web/МАРГ/NULL/NULL/RU",
+            "./img/Product-pictures/burger/contents/692d2deb2bcf5a6624022ddd409465f1-216x188.jpeg",
           name: "Маргарита",
           price: 449,
         },
         {
           id: 3,
           previewPictureUrl:
-            "https://staticy.dominospizza.ru/api/medium/ProductOsg/Web/ВЕИГ/NULL/NULL/RU",
+            "./img/Product-pictures/burger/contents/974edecf033718be661b25aee2b5a00f-216x188.jpeg",
+          name: "Ветчина и грибы",
+          price: 699,
+        },
+        {
+          id: 4,
+          previewPictureUrl:
+            "./img/Product-pictures/burger/contents/a48d7ea04ee209a5dbda33781dd6627f-216x188.jpeg",
+          name: "Ветчина и грибы",
+          price: 699,
+        },
+        {
+          id: 5,
+          previewPictureUrl:
+            "./img/Product-pictures/burger/contents/aa477adba4fdf648d5898ce4ecabb5ad-216x188.jpeg",
+          name: "Ветчина и грибы",
+          price: 699,
+        },
+        {
+          id: 6,
+          previewPictureUrl:
+            "./img/Product-pictures/burger/contents/bb47e615264753f9b4a4407d76910ec1-216x188.jpeg",
+          name: "Ветчина и грибы",
+          price: 699,
+        },
+        {
+          id: 7,
+          previewPictureUrl:
+            "./img/Product-pictures/burger/contents/bb47e615264753f9b4a4407d76910ec1-216x188.jpeg",
+          name: "Ветчина и грибы",
+          price: 699,
+        },
+        {
+          id: 8,
+          previewPictureUrl:
+            "./img/Product-pictures/burger/contents/bb47e615264753f9b4a4407d76910ec1-216x188.jpeg",
+          name: "Ветчина и грибы",
+          price: 699,
+        },
+        {
+          id: 9,
+          previewPictureUrl:
+            "./img/Product-pictures/burger/contents/bb47e615264753f9b4a4407d76910ec1-216x188.jpeg",
           name: "Ветчина и грибы",
           price: 699,
         },
@@ -170,13 +227,16 @@ function createMenuHandler() {
           .map((product) => {
             return `
             <figure class="menu__item">
-              <img src="${product.previewPictureUrl}" alt="${product.name}">
-              <figcaption>
-                <h3 id="menu__name">
+              <img  class="menu__item-img" 
+              src="${product.previewPictureUrl}" 
+              alt="${product.name}">
+              
+              <figcaption class="menu__item-text-box">
+                <h3 class="menu__item-title" id="menu__name">
                   ${firstSimonToLocaleUpperCase(product.name)}
                 </h3>
-                <p id="menu__price">
-                  ${product.price}
+                <p class="menu__item-price" id="menu__price">
+                  ${product.price} руб
                 </p>
               </figcaption>
             </figure>
@@ -205,8 +265,10 @@ function createMenuHandler() {
             let exportableItem = Object.assign(
               {},
               { categoryID: categories.id },
+              { fromСotigoria: categories.title },
               exportItem
             );
+            console.log(exportableItem);
             arrowFunction(exportableItem);
           });
         });
@@ -314,6 +376,7 @@ function createProductListHandler(containerId) {
       },
     };
   }
+
   const templates = new Map();
 
   function increaseProductCount(key, value) {
@@ -364,6 +427,7 @@ function createProductListHandler(containerId) {
       }
     });
   }
+
   return {
     importAndAdd(element) {
       const {
@@ -373,6 +437,7 @@ function createProductListHandler(containerId) {
         count = 1,
         categoryID,
         id,
+        fromСotigoria,
       } = element;
 
       const key = `${categoryID}.${id}`;
@@ -380,7 +445,6 @@ function createProductListHandler(containerId) {
 
       if (itemParameters) {
         increaseProductCount(key, "+");
-        console.log(itemParameters);
       }
 
       if (!itemParameters) {
@@ -390,6 +454,7 @@ function createProductListHandler(containerId) {
           price,
           count,
           previewPictureUrl,
+          fromСotigoria,
         };
 
         mapSelectedProducts.set(key, newItemParameters);
